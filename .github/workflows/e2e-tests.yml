@@ -2,12 +2,15 @@ name: E2E Tests
 
 on:
   push:
-    branches: [ main, xmaster ]
+    branches: [ main, master ]
 
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      MONGO_ROOT_USER: ci
+      MONGO_ROOT_PASSWORD: ci-only-password
     
     steps:
       - name: Checkout code
@@ -72,7 +75,7 @@ jobs:
         working-directory: ./todo-app
         run: |
           echo "=== Backend logs ==="
-          docker compose logs backend
+          docker compose logs todo-backend
           echo "=== Frontend logs ==="
           docker compose logs app
           echo "=== Nginx logs ==="
