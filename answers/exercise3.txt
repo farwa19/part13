@@ -1,0 +1,20 @@
+nano index.js
+root@985e12e593cd:/usr/src/app# ls
+index.js
+root@985e12e593cd:/usr/src/app# cat index.js
+cat: index.js: Is a directory
+root@985e12e593cd:/usr/src/app# ls -la index.js
+total 8
+drwxr-xr-x 2 root root 4096 Nov  4 13:31 .
+drwxr-xr-x 3 root root 4096 Nov  4 13:31 ..
+root@985e12e593cd:/usr/src/app# rmdir index.js
+root@985e12e593cd:/usr/src/app# ls
+root@985e12e593cd:/usr/src/app# nano /usr/src/app/index.js
+root@985e12e593cd:/usr/src/app# ls /usr/src/app
+index.js
+root@985e12e593cd:/usr/src/app# LS
+bash: LS: command not found
+root@985e12e593cd:/usr/src/app# ls
+index.js
+root@985e12e593cd:/usr/src/app# cat index.js
+console.log('Hello World')

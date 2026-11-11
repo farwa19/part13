@@ -1,0 +1,61 @@
+
+services:
+  nginx:
+    image: nginx:1.29
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - 8080:80
+    container_name: reverse-proxy
+    depends_on:
+      - todo-frontend
+      - todo-backend
+
+  mongo:
+    image: mongo
+
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?Set MONGO_ROOT_USER in .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}
+      MONGO_INITDB_DATABASE: docker
+    volumes:
+      - mongo_data:/data/db
+      - ./todo-backend/mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+  redis:
+    image: redis
+   
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+  todo-backend:
+    image: express-server
+    build:
+      context: ./todo-backend
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./todo-backend:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      MONGO_URL: "mongodb://${MONGO_ROOT_USER:?Set MONGO_ROOT_USER in .env}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}@mongo:27017/docker?authSource=admin"
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - mongo
+      - redis
+
+  todo-frontend:
+    image: hello-front-dev
+    build:
+      context: ./todo-frontend
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./todo-frontend:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      VITE_BACKEND_URL: /api
+    container_name: hello-front-dev
+
+volumes:
+  mongo_data:
+  redis_data:

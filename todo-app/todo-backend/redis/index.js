@@ -3,6 +3,8 @@ const { REDIS_URL } = require('../util/config')
 
 let set
 let get
+let increment
+let getCount
 
 if (!REDIS_URL) {
   const redisIsDisabled = () => {
@@ -11,8 +13,10 @@ if (!REDIS_URL) {
   }
   set = redisIsDisabled
   get = redisIsDisabled
+  increment = redisIsDisabled
+  getCount = redisIsDisabled
 } else {
-  let client = redis.createClient({
+  const client = redis.createClient({
     url: REDIS_URL
   })
 
@@ -24,9 +28,13 @@ if (!REDIS_URL) {
     
   get = (...args) => client.get(...args)
   set = (...args) => client.set(...args)
+  increment = (key = 'todos:added') => client.incr(key)
+  getCount = async (key = 'todos:added') => Number(await client.get(key) || 0)
 }
 
 module.exports = {
   get,
   set,
+  increment,
+  getCount,
 }

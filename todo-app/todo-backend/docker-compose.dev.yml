@@ -1,0 +1,42 @@
+services:
+  mongo:
+    image: mongo
+    ports:
+      - "3456:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:?Set MONGO_ROOT_USER in .env}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}
+      MONGO_INITDB_DATABASE: docker
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+
+  server:
+    image: express-server
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      MONGO_URL: "mongodb://${MONGO_ROOT_USER:?Set MONGO_ROOT_USER in .env}:${MONGO_ROOT_PASSWORD:?Set MONGO_ROOT_PASSWORD in .env}@mongo:27017/docker?authSource=admin"
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      - mongo
+      - redis
+    
+
+volumes:
+  mongo_data:
+  redis_data:

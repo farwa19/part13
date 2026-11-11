@@ -1,0 +1,17 @@
+services:
+  app:
+  
+    image: hello-front-dev
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    volumes:
+      - ./:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 3210:5173
+    environment:
+      VITE_BACKEND_URL: http://localhost:3000
+    container_name: hello-front-dev # This will name the container hello-front-dev 
+  debug-helper:
+    image: busybox
