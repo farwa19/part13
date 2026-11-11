@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import axios from '../util/apiClient'
 import List from './List'
 import Form from './Form'
@@ -7,10 +7,14 @@ const TodoView = () => {
   const [todos, setTodos] = useState([])
   const [addedTodos, setAddedTodos] = useState()
   const [statisticsError, setStatisticsError] = useState(false)
+  const todosRequestId = useRef(0)
 
   const refreshTodos = async () => {
+    const requestId = ++todosRequestId.current
     const { data } = await axios.get('/todos')
-    setTodos(data)
+    if (requestId === todosRequestId.current) {
+      setTodos(data)
+    }
   }
 
   const refreshStatistics = async () => {
@@ -31,7 +35,8 @@ const TodoView = () => {
 
   const createTodo = async (todo) => {
     const { data } = await axios.post('/todos', todo)
-    setTodos([...todos, data])
+    todosRequestId.current += 1
+    setTodos(currentTodos => [...currentTodos, data])
     refreshStatistics()
   }
 
